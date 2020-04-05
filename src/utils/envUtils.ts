@@ -21,14 +21,14 @@ export const getPropertiesFromEnv = (envVariableMappings: Array<EnvVariableMappi
 /**
  * Retrieves the properties defined by the APPLICATION_JSON env variable, if defined.
  *
- * @returns {ConfigObject} The Spring Application JSON from ENV as an Object.
+ * @returns {ConfigObject} The Application JSON from ENV as an Object.
  */
-export const getSpringApplicationJsonFromEnv = (): ConfigObject => {
-    let springApplicationJson: ConfigObject = {};
+export const getApplicationJsonFromEnv = (): ConfigObject => {
+    let applicationJson: ConfigObject = {};
     if (process.env.APPLICATION_JSON !== undefined) {
-        springApplicationJson = JSON.parse(process.env.APPLICATION_JSON);
-        logger.debug(`Spring Application JSON from Env: ${JSON.stringify(springApplicationJson)}`);
+        applicationJson = JSON.parse(process.env.APPLICATION_JSON);
+        logger.debug(`Application JSON from Env: ${JSON.stringify(applicationJson)}`);
     }
 
-    return springApplicationJson;
+    return applicationJson;
 };

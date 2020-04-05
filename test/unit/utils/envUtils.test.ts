@@ -1,29 +1,29 @@
 import { assert } from 'chai';
-import { getSpringApplicationJsonFromEnv, getPropertiesFromEnv } from '../../../src/utils';
+import { getApplicationJsonFromEnv, getPropertiesFromEnv } from '../../../src/utils';
 import { PREDEFINED_ENV_PROPERTIES } from '../../../src/constants';
 
 describe('envUtils', function() {
 
-	describe('#getSpringApplicationJsonFromEnv', function () {
+	describe('#getApplicationJsonFromEnv', function () {
 
         afterEach(function() {
 			delete process.env.APPLICATION_JSON;
 		});
 
 		it('should return empty if undefined', function (done: Function) {
-            assert.deepEqual(getSpringApplicationJsonFromEnv(), {});
+            assert.deepEqual(getApplicationJsonFromEnv(), {});
             done();
         });
 
 		it('should return empty if empty', function (done: Function) {
             process.env.APPLICATION_JSON = '{}';
-            assert.deepEqual(getSpringApplicationJsonFromEnv(), {});
+            assert.deepEqual(getApplicationJsonFromEnv(), {});
             done();
         });
 
 		it('should return data when defined', function (done: Function) {
             process.env.APPLICATION_JSON = '{ "testProp": "testValue" }';
-            assert.deepEqual(getSpringApplicationJsonFromEnv(), { 'testProp': 'testValue' });
+            assert.deepEqual(getApplicationJsonFromEnv(), { 'testProp': 'testValue' });
             done();
         });
 

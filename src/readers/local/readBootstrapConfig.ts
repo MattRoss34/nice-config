@@ -1,5 +1,5 @@
 import { ConfigObject, NiceConfigOptions } from "../../models";
-import { mergeProperties, readYamlAsDocument, getSpringApplicationJsonFromEnv, getPropertiesFromEnv } from "../../utils";
+import { mergeProperties, readYamlAsDocument, getApplicationJsonFromEnv, getPropertiesFromEnv } from "../../utils";
 import { BootstrapConfigSchema } from "../../schemas";
 import { PREDEFINED_ENV_PROPERTIES } from "../../constants";
 
@@ -16,7 +16,7 @@ export const readBootstrapConfig = async (options: NiceConfigOptions): Promise<C
     const theBootstrapPath: string = bootstrapPath !== undefined ? bootstrapPath : configPath;
     const thisBootstrapConfig: ConfigObject = mergeProperties([
         await readYamlAsDocument(`${theBootstrapPath}/bootstrap.yml`, activeProfiles),
-        getSpringApplicationJsonFromEnv(),
+        getApplicationJsonFromEnv(),
         getPropertiesFromEnv(PREDEFINED_ENV_PROPERTIES)
     ]);
 
