@@ -1,7 +1,22 @@
 import { ConfigObject } from '../models';
 import { logger } from './logger';
-import { PREDEFINED_ENV_PROPERTIES } from '../constants';
 import { parsePropertiesToObjects } from './documentUtils';
+
+export type EnvVariableMapping = {
+    envVariableName: string;
+    propertyName: string;
+};
+
+export const getPropertiesFromEnv = (envVariableMappings: Array<EnvVariableMapping>): ConfigObject => {
+    let envProps: Record<string, string> = {};
+    envVariableMappings.forEach(({ envVariableName, propertyName }) => {
+        if (process.env[envVariableName] !== undefined) {
+            envProps[propertyName] = process.env[envVariableName]!;
+        }
+    });
+
+    return parsePropertiesToObjects(envProps);
+};
 
 /**
  * Retrieves the properties defined by the APPLICATION_JSON env variable, if defined.
@@ -16,24 +31,4 @@ export const getSpringApplicationJsonFromEnv = (): ConfigObject => {
     }
 
     return springApplicationJson;
-};
-
-/**
- * Retrieves a predefined set of variables from node env and maps them to config properties.
- *
- * @returns {ConfigObject} The env variables mapped to a config properties object.
- */
-export const getPredefinedEnvProperties = (): ConfigObject => {
-    let customEnvProperties: ConfigObject = {};
-    Object.entries(PREDEFINED_ENV_PROPERTIES).forEach(([customEnvVariable, propertyMapping]) => {
-        if (process.env[customEnvVariable] !== undefined) {
-            customEnvProperties[propertyMapping] = process.env[customEnvVariable];
-        }
-    });
-
-    customEnvProperties = parsePropertiesToObjects(customEnvProperties);
-
-    logger.debug(`Custom Properties from Env: ${JSON.stringify(customEnvProperties)}`);
-
-    return customEnvProperties;
 };

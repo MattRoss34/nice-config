@@ -29,7 +29,7 @@ describe('index', function() {
 				bootstrapPath: 'test',
 				configPath: 'test',
 				activeProfiles: ['test1'],
-				level: 'debug'
+				logLevel: 'debug'
 			};
 
 			const loadPromise: Promise<ConfigObject> =  load(options);
@@ -48,7 +48,7 @@ describe('index', function() {
 				bootstrapPath: 'test',
 				configPath: 'test',
 				activeProfiles: ['test1'],
-				level: 'debug'
+				logLevel: 'debug'
 			};
 
 			const loadPromise: Promise<ConfigObject> =  load(options);

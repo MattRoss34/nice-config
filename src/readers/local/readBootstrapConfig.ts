@@ -1,6 +1,7 @@
 import { ConfigObject, NiceConfigOptions } from "../../models";
-import { mergeProperties, readYamlAsDocument, getSpringApplicationJsonFromEnv, getPredefinedEnvProperties } from "../../utils";
+import { mergeProperties, readYamlAsDocument, getSpringApplicationJsonFromEnv, getPropertiesFromEnv } from "../../utils";
 import { BootstrapConfigSchema } from "../../schemas";
+import { PREDEFINED_ENV_PROPERTIES } from "../../constants";
 
 /**
  * Reads the application's bootstrap configuration file into an object.
@@ -16,7 +17,7 @@ export const readBootstrapConfig = async (options: NiceConfigOptions): Promise<C
     const thisBootstrapConfig: ConfigObject = mergeProperties([
         await readYamlAsDocument(`${theBootstrapPath}/bootstrap.yml`, activeProfiles),
         getSpringApplicationJsonFromEnv(),
-        getPredefinedEnvProperties()
+        getPropertiesFromEnv(PREDEFINED_ENV_PROPERTIES)
     ]);
 
     const { error } = BootstrapConfigSchema.validate(thisBootstrapConfig, { allowUnknown: true });

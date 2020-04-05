@@ -1,23 +1,21 @@
 import { RetryOptions } from "./Retry";
 
-export interface NiceConfigOptions {
+export type NiceConfigOptions = {
     bootstrapPath?: string;
     configPath: string;
     activeProfiles: string[];
-    level?: string;
-}
+    logLevel?: string;
+};
 
-export interface ConfigClientRetryOptions extends RetryOptions {}
+export type ConfigClientRetryOptions = RetryOptions;
 
-export interface ConfigClientOptions {
+export type ConfigClientOptions = {
     enabled: boolean;
     'fail-fast': boolean;
     retry?: ConfigClientRetryOptions;
-}
+};
 
-export interface Document {
-    // tslint:disable-next-line: no-any
-    [name: string]: any;
-}
+// tslint:disable-next-line: no-any
+export type Document = Record<string, any>;
 
-export interface ConfigObject extends Document {}
+export type ConfigObject = Document;

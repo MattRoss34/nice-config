@@ -1,10 +1,10 @@
-export interface RetryOptions {
+export type RetryOptions = {
     enabled: boolean;
     'max-attempts'?: number;
     'max-interval'?: number;
     'initial-interval'?: number;
     multiplier?: number;
-}
+};
 
 export class RetryState {
     public active: boolean = false;

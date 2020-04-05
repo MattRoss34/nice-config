@@ -4,7 +4,7 @@ export const NiceConfigOptionsSchema = joi.object().keys({
     bootstrapPath: joi.string(),
     configPath: joi.string().required(),
     activeProfiles: joi.array().items(joi.string()).required(),
-    level: joi.string()
+    logLevel: joi.string()
 });
 
 export const BootstrapConfigSchema = joi.object().keys({

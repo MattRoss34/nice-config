@@ -61,7 +61,7 @@ const NiceConfig = require('nice-config');
 const configOptions = {
     configPath: `${__dirname}/config`,
     activeProfiles: ['dev1'],
-    level: 'debug'
+    logLevel: 'debug'
 };
 
 let myConfig;
@@ -89,7 +89,7 @@ import { Config, NiceConfigOptions, ConfigObject } from 'nice-config';
 const niceConfigOptions: NiceConfigOptions = {
     configPath: `${__dirname}/config`,
     activeProfiles: ['dev1'],
-    level: 'debug'
+    logLevel: 'debug'
 };
 
 let myConfig: ConfigObject;

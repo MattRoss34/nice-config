@@ -66,7 +66,7 @@ export class NiceConfig {
 			throw new Error('Invalid options supplied. Please consult the documentation.');
 		}
 
-		logger.level = (options.level !== undefined ? options.level : 'info');
+		logger.level = (options.logLevel !== undefined ? options.logLevel : 'info');
 
 		return await this.readConfig(options);
 	}

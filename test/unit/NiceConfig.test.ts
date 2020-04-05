@@ -51,7 +51,7 @@ describe('NiceConfig', function() {
 				bootstrapPath: './test/fixtures/load/cloudDisabled',
 				configPath: './test/fixtures/readAppConfig/singleAppYaml',
 				activeProfiles: ['dev1'],
-				level: 'debug'
+				logLevel: 'debug'
 			};
 
 			const load: Promise<ConfigObject> =  niceConfig.load(options);
@@ -67,7 +67,7 @@ describe('NiceConfig', function() {
 				bootstrapPath: './test/fixtures/load/cloudDisabled',
 				configPath: './test/fixtures/readAppConfig/multiAppYaml',
 				activeProfiles: [],
-				level: 'debug'
+				logLevel: 'debug'
 			};
 
 			const load: Promise<ConfigObject> =  niceConfig.load(options);
@@ -83,7 +83,7 @@ describe('NiceConfig', function() {
 				bootstrapPath: './test/fixtures/load/cloudDisabled',
 				configPath: './test/fixtures/readAppConfig/multiAppYaml',
 				activeProfiles: ['dev2'],
-				level: 'debug'
+				logLevel: 'debug'
 			};
 
 			const load: Promise<ConfigObject> =  niceConfig.load(options);
@@ -101,7 +101,7 @@ describe('NiceConfig', function() {
 				bootstrapPath: './test/fixtures/load/commonConfig',
 				configPath: './test/fixtures/readAppConfig/multiAppYaml',
 				activeProfiles: [],
-				level: 'debug'
+				logLevel: 'debug'
 			};
 
 			const load: ConfigObject = niceConfig.load(options);
@@ -115,7 +115,7 @@ describe('NiceConfig', function() {
 				bootstrapPath: './test/fixtures/load/commonConfig',
 				configPath: './test/fixtures/readAppConfig/multiAppYaml',
 				activeProfiles: [],
-				level: 'debug'
+				logLevel: 'debug'
 			};
 
 			const load: Promise<ConfigObject> =  niceConfig.load(options);
@@ -162,7 +162,7 @@ describe('NiceConfig', function() {
 				bootstrapPath: './test/fixtures/load/commonConfig',
 				configPath: './badPath/fixtures/load/config',
 				activeProfiles: [],
-				level: 'debug'
+				logLevel: 'debug'
 			};
 
 			const load: Promise<ConfigObject> =  niceConfig.load(options);
@@ -185,7 +185,7 @@ describe('NiceConfig', function() {
 			const options: NiceConfigOptions = {
 				configPath: './test/fixtures/load/configSameFolder',
 				activeProfiles: [],
-				level: 'debug'
+				logLevel: 'debug'
 			};
 
 			const load: Promise<ConfigObject> =  niceConfig.load(options);
@@ -203,7 +203,7 @@ describe('NiceConfig', function() {
 				bootstrapPath: './test/fixtures/load/commonConfig',
 				configPath: './test/fixtures/load/config',
 				activeProfiles: [],
-				level: 'debug'
+				logLevel: 'debug'
 			};
 
 			const load: Promise<ConfigObject> =  niceConfig.load(options);
@@ -221,7 +221,7 @@ describe('NiceConfig', function() {
 				bootstrapPath: './test/fixtures/load/commonConfig',
 				configPath: './test/fixtures/load/appNameConfig',
 				activeProfiles: [],
-				level: 'debug'
+				logLevel: 'debug'
 			};
 
 			const load: Promise<ConfigObject> =  niceConfig.load(options);
@@ -238,7 +238,7 @@ describe('NiceConfig', function() {
 				bootstrapPath: './test/fixtures/load/commonConfig',
 				configPath: './test/fixtures/load/config',
 				activeProfiles: ['dev2'],
-				level: 'debug'
+				logLevel: 'debug'
 			};
 
 			const load: Promise<ConfigObject> =  niceConfig.load(options);
@@ -256,7 +256,7 @@ describe('NiceConfig', function() {
 				bootstrapPath: './test/fixtures/load/commonConfig',
 				configPath: './test/fixtures/load/config',
 				activeProfiles: ['default'],
-				level: 'debug'
+				logLevel: 'debug'
 			};
 
 			const load: Promise<ConfigObject> =  niceConfig.load(options);
@@ -276,7 +276,7 @@ describe('NiceConfig', function() {
 				bootstrapPath: './test/fixtures/load/commonConfig',
 				configPath: './test/fixtures/load/config',
 				activeProfiles: ['dev1'],
-				level: 'debug'
+				logLevel: 'debug'
 			};
 
 			const load: Promise<ConfigObject> =  niceConfig.load(options);
@@ -311,7 +311,7 @@ describe('NiceConfig', function() {
 				bootstrapPath: './test/fixtures/load/commonConfig',
 				configPath: './test/fixtures/load/config',
 				activeProfiles: [],
-				level: 'debug'
+				logLevel: 'debug'
 			};
 
 			const load: Promise<ConfigObject> =  niceConfig.load(options);

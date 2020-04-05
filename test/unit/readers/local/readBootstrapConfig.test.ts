@@ -46,7 +46,7 @@ describe('readBootstrapConfig', function() {
 				bootstrapPath: './test/fixtures/load/commonConfig',
 				configPath: './test/fixtures/load/config',
 				activeProfiles: [],
-				level: 'debug'
+				logLevel: 'debug'
 			};
 
 			const load: Promise<ConfigObject> =  readBootstrapConfig(options);
@@ -62,7 +62,7 @@ describe('readBootstrapConfig', function() {
 				bootstrapPath: './test/fixtures/load/commonConfig',
 				configPath: './test/fixtures/load/config',
 				activeProfiles: ['dev2'],
-				level: 'debug'
+				logLevel: 'debug'
 			};
 
 			const load: Promise<ConfigObject> =  readBootstrapConfig(options);
