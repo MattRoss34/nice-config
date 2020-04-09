@@ -4,9 +4,9 @@ Depends on [cloud-config-client](https://www.npmjs.com/package/cloud-config-clie
 
 ### Description
 
-Enable the use of spring cloud config via the bootstrap property `spring.cloud.config.enabled: true`.
+Turn on spring cloud config via the bootstrap property `spring.cloud.config.enabled: true`.
 
-The properties from your spring cloud config server will be merged with your `application.yml`, with the remote propertis taking higher precedence.
+The properties from your spring cloud config server will be merged with your `application.yml`, with the remote properties taking higher precedence.
 
 #### Cloud Config Client Fail Fast
 
@@ -14,7 +14,7 @@ If you need nice-config to throw an error when it can't reach the cloud config s
 
 #### Cloud Config Client Retry
 
-If you'd like spring-cloud-config to retry connecting to your cloud config server after a failure, set the bootstrap property `spring.cloud.config.retry.enabled: true`, in addition to setting `fail-fast` to true (see above). When retry is enabled, spring-cloud-config will retry the config server connection based on the retry configuration you provide, or based on the default configuration.  Below are the retry properties and their defaults. See the API specs further down for details.
+If you'd like nice-config to retry connecting to your cloud config server after a failure, set the bootstrap property `spring.cloud.config.retry.enabled: true`, in addition to setting `fail-fast` to true (see above). When retry is enabled, nice-config will retry the config server connection based on the retry configuration you provide, or based on the default configuration.  Below are the retry properties and their defaults. See the API specs further down for details.
 
 - `spring.cloud.config.retry.enabled`: false
 - `spring.cloud.config.retry.max-attempts`: 6
