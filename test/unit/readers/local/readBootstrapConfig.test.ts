@@ -9,17 +9,17 @@ chai.should();
 
 describe('readBootstrapConfig', function() {
 
-		it('should fail without activeProfiles', async function() {
+		it('should not fail without activeProfiles', async function() {
 			// @ts-ignore
 			const options: NiceConfigOptions = {
 				configPath: './test/fixtures/load/config',
 			};
 
 			const load: Promise<ConfigObject> =  readBootstrapConfig(options);
-			return load.should.eventually.be.rejected;
+			return load.should.eventually.be.fulfilled;
 		});
 
-		it('should fail with invalid bootstrap path', async function() {
+		it('should not fail with invalid bootstrap path', async function() {
 			const options: NiceConfigOptions = {
 				bootstrapPath: './badPath/commonConfig',
 				configPath: './test/fixtures/load/config',
@@ -27,7 +27,7 @@ describe('readBootstrapConfig', function() {
 			};
 
 			const load: Promise<ConfigObject> =  readBootstrapConfig(options);
-			return load.should.eventually.be.rejected;
+			return load.should.eventually.be.fulfilled;
 		});
 
 		it('should fail with bad bootstrap config', async function() {

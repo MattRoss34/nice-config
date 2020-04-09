@@ -8,10 +8,10 @@ export const NiceConfigOptionsSchema = joi.object().keys({
 });
 
 export const BootstrapConfigSchema = joi.object().keys({
-    spring: joi.object().required().keys({
-        cloud: joi.object().required().keys({
-            config: joi.object().required().keys({
-                enabled: joi.boolean().required(),
+    spring: joi.object().keys({
+        cloud: joi.object().keys({
+            config: joi.object().keys({
+                enabled: joi.boolean(),
                 'fail-fast': joi.boolean(),
                 retry: joi.object().keys({
                     enabled: joi.boolean().required(),

@@ -170,17 +170,17 @@ describe('NiceConfig', function() {
 			return load.should.eventually.be.rejected;
 		});
 
-		it('should fail without activeProfiles', async function() {
+		it('should not fail without activeProfiles', async function() {
 			// @ts-ignore
 			setEnvVars({
 				CONFIG_PATH: './test/fixtures/load/config',
 			});
 
 			const load: Promise<ConfigObject> =  niceConfig.load();
-			return load.should.eventually.be.rejected;
+			return load.should.eventually.be.fulfilled;
 		});
 
-		it('should fail with invalid bootstrap path', async function() {
+		it('should not fail with invalid bootstrap path', async function() {
 			setEnvVars({
 				CONFIG_BOOTSTRAP_PATH: './badPath/commonConfig',
 				CONFIG_PATH: './test/fixtures/load/config',
@@ -188,7 +188,7 @@ describe('NiceConfig', function() {
 			});
 
 			const load: Promise<ConfigObject> =  niceConfig.load();
-			return load.should.eventually.be.rejected;
+			return load.should.eventually.be.fulfilled;
 		});
 
 		it('should fail with invalid app config path', async function() {
