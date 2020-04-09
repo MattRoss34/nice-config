@@ -1,8 +1,8 @@
 # Yaml Config + Remote Property Sources for NodeJS Applications
 
 [![NPM Version](https://img.shields.io/npm/v/nice-config.svg?style=flat)](https://www.npmjs.com/package/nice-config)
-[![Build Status](https://travis-ci.org/MattRoss34/nice-config.svg?branch=master)](https://travis-ci.org/MattRoss34/nice-config)
-[![Coverage Status](https://coveralls.io/repos/github/MattRoss34/nice-config/badge.svg)](https://coveralls.io/github/MattRoss34/nice-config)
+[![Build Status](https://travis-ci.com/MattRoss34/nice-config.svg?branch=master)](https://travis-ci.com/MattRoss34/nice-config)
+[![Coverage Status](https://coveralls.io/repos/github/MattRoss34/nice-config/badge.svg?branch=master)](https://coveralls.io/github/MattRoss34/nice-config?branch=master)
 
 You get to define your configuration in yaml!  Plus, you can override configuration at runtime using remote property sources, like Spring Cloud Config Server.  Hellooo feature flags!
 
