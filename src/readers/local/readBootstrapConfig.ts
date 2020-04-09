@@ -28,4 +28,4 @@ export const readBootstrapConfig = async (options: NiceConfigOptions): Promise<C
     thisBootstrapConfig.spring.cloud.config.profiles = options.activeProfiles;
 
     return thisBootstrapConfig;
-}
+};

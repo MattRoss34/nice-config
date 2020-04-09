@@ -26,4 +26,4 @@ export const readApplicationConfig = async (appConfigPath: string, activeProfile
     });
 
     return mergeProperties(appConfigs);
-}
+};

@@ -25,7 +25,7 @@ export class NiceConfig {
 				bootstrapPath,
 				configPath: configPath || './config',
 				activeProfiles: activeProfiles ? activeProfiles.split(',') : [],
-				logLevel: logLevel || 'info'
+				logLevel: logLevel || 'warn'
 			};
 		}
 
