@@ -7,7 +7,7 @@ export type EnvVariableMapping = {
     propertyName: string;
 };
 
-export const getPropertiesFromEnv = (envVariableMappings: Array<EnvVariableMapping>): ConfigObject => {
+export const getPropertiesFromEnv = (envVariableMappings: Array<EnvVariableMapping>): Record<string, string> => {
     let envProps: Record<string, string> = {};
     envVariableMappings.forEach(({ envVariableName, propertyName }) => {
         if (process.env[envVariableName] !== undefined) {
@@ -15,8 +15,11 @@ export const getPropertiesFromEnv = (envVariableMappings: Array<EnvVariableMappi
         }
     });
 
-    return parsePropertiesToObjects(envProps);
+    return envProps;
 };
+
+export const getAndParsePropsFromEnv = (envVariableMappings: Array<EnvVariableMapping>): ConfigObject =>
+    parsePropertiesToObjects(getPropertiesFromEnv(envVariableMappings));
 
 /**
  * Retrieves the properties defined by the APPLICATION_JSON env variable, if defined.

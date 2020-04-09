@@ -1,5 +1,5 @@
 import { ConfigObject, NiceConfigOptions } from "../../models";
-import { mergeProperties, readYamlAsDocument, getApplicationJsonFromEnv, getPropertiesFromEnv } from "../../utils";
+import { mergeProperties, readYamlAsDocument, getApplicationJsonFromEnv, getAndParsePropsFromEnv } from "../../utils";
 import { BootstrapConfigSchema } from "../../schemas";
 import { PREDEFINED_ENV_PROPERTIES } from "../../constants";
 
@@ -17,7 +17,7 @@ export const readBootstrapConfig = async (options: NiceConfigOptions): Promise<C
     const thisBootstrapConfig: ConfigObject = mergeProperties([
         await readYamlAsDocument(`${theBootstrapPath}/bootstrap.yml`, activeProfiles),
         getApplicationJsonFromEnv(),
-        getPropertiesFromEnv(PREDEFINED_ENV_PROPERTIES)
+        getAndParsePropsFromEnv(PREDEFINED_ENV_PROPERTIES)
     ]);
 
     const { error } = BootstrapConfigSchema.validate(thisBootstrapConfig, { allowUnknown: true });

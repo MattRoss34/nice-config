@@ -3,7 +3,7 @@ import { assert } from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 import * as sinon from 'sinon';
 import { SinonStub } from 'sinon';
-import { Config, ConfigObject, instance, load, NiceConfigOptions } from '../../src';
+import { Config, ConfigObject, instance, load } from '../../src';
 
 chai.use(chaiAsPromised);
 chai.should();
@@ -25,14 +25,8 @@ describe('index', function() {
 
 		it('should throw error if library method throws error', async function() {
             loadStub.rejects(new Error('Some Error'));
-			const options: NiceConfigOptions = {
-				bootstrapPath: 'test',
-				configPath: 'test',
-				activeProfiles: ['test1'],
-				logLevel: 'debug'
-			};
 
-			const loadPromise: Promise<ConfigObject> =  load(options);
+			const loadPromise: Promise<ConfigObject> =  load();
 			return loadPromise.should.eventually.be.rejectedWith('Some Error');
 		});
 
@@ -44,14 +38,8 @@ describe('index', function() {
                     feature2: true
                 }
             });
-			const options: NiceConfigOptions = {
-				bootstrapPath: 'test',
-				configPath: 'test',
-				activeProfiles: ['test1'],
-				logLevel: 'debug'
-			};
 
-			const loadPromise: Promise<ConfigObject> =  load(options);
+			const loadPromise: Promise<ConfigObject> =  load();
 			return loadPromise.should.eventually.be.fulfilled.then((config: ConfigObject) => {
 				assert.deepEqual(config.testUrl, 'http://www.default.com');
 				assert.deepEqual(config.featureFlags.feature1, false);

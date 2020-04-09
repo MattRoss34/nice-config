@@ -3,13 +3,34 @@ import { injectable } from 'inversify';
 import { ConfigObject, NiceConfigOptions } from './models';
 import { readApplicationConfig, readBootstrapConfig } from './readers/local';
 import * as remoteConfigReaders from './readers/remote';
-import { NiceConfigOptionsSchema } from './schemas';
-import { logger, mergeProperties } from './utils';
+import { logger, mergeProperties, getPropertiesFromEnv } from './utils';
+import { NICE_CONFIG_ENV_OPTIONS } from './constants';
 
 @injectable()
 export class NiceConfig {
+	private options?: NiceConfigOptions;
 	private bootstrapConfig: ConfigObject;
-	private Config: ConfigObject | undefined;
+	private Config: ConfigObject = {};
+
+	private getOptions(): NiceConfigOptions {
+		if (!this.options) {
+			const {
+				bootstrapPath,
+				configPath,
+				activeProfiles,
+				logLevel
+			} = getPropertiesFromEnv(NICE_CONFIG_ENV_OPTIONS);
+
+			this.options = {
+				bootstrapPath,
+				configPath: configPath || './config',
+				activeProfiles: activeProfiles ? activeProfiles.split(',') : [],
+				logLevel: logLevel || 'info'
+			};
+		}
+
+		return this.options;
+	}
 
 	/**
 	 * Reads an application's configuration properties from various sources
@@ -39,7 +60,7 @@ export class NiceConfig {
 
 		const readers = Object.values(remoteConfigReaders);
 
-		for (let i=0; i < readers.length; i++) {
+		for (let i = 0; i < readers.length; i++) {
 			const remoteConfig = await readers[i](this.bootstrapConfig);
 			configProperties.push(remoteConfig);
 		}
@@ -60,23 +81,9 @@ export class NiceConfig {
 	 * @param {NiceConfigOptions} options The config options that drive behavior here.
 	 * @returns {ConfigObject} The merged configuration properties from all sources.
 	 */
-	public async load(options: NiceConfigOptions): Promise<ConfigObject> {
-		const { error } = NiceConfigOptionsSchema.validate(options);
-		if (error !== null) {
-			throw new Error('Invalid options supplied. Please consult the documentation.');
-		}
-
-		logger.level = (options.logLevel !== undefined ? options.logLevel : 'info');
-
-		return await this.readConfig(options);
+	public load = async (): Promise<ConfigObject> => {
+		return await this.readConfig(this.getOptions());
 	}
 
-	public instance(): ConfigObject {
-		if (this.Config === undefined) {
-			throw new Error('NiceConfig hasn\'t been loaded yet. Call \'load\' function first.');
-		}
-
-		return this.Config;
-	}
-
+	public instance = (): ConfigObject => this.Config;
 }

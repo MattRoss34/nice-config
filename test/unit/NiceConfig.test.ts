@@ -4,14 +4,22 @@ import * as chaiAsPromised from 'chai-as-promised';
 import decache from 'decache';
 import * as sinon from 'sinon';
 import { SinonStub } from 'sinon';
-import { ConfigObject, NiceConfigOptions } from '../../src';
+import { ConfigObject } from '../../src';
 import { NiceConfig } from '../../src/NiceConfig';
 import * as remoteConfigReaders from '../../src/readers/remote';
 
 chai.use(chaiAsPromised);
 chai.should();
 
+const setEnvVars = (vars: Record<string, string>) => {
+	process.env = {
+		...process.env,
+		...vars
+	};
+};
+
 describe('NiceConfig', function() {
+	let nodeEnv = process.env;
 	let sandbox = sinon.createSandbox();
 	const defaultProfileConfig: ConfigObject = {
 		testUrl: 'http://www.default-local.com',
@@ -44,17 +52,18 @@ describe('NiceConfig', function() {
 		afterEach(async function() {
 			sandbox.restore();
 			decache('../../src');
+			process.env = nodeEnv;
 		});
 
 		it('should read application config without profile-specific yaml', async function() {
-			const options: NiceConfigOptions = {
-				bootstrapPath: './test/fixtures/load/cloudDisabled',
-				configPath: './test/fixtures/readAppConfig/singleAppYaml',
-				activeProfiles: ['dev1'],
-				logLevel: 'debug'
-			};
+			setEnvVars({
+				CONFIG_BOOTSTRAP_PATH: './test/fixtures/load/cloudDisabled',
+				CONFIG_PATH: './test/fixtures/readAppConfig/singleAppYaml',
+				ACTIVE_PROFILES: 'dev1',
+				LOG_LEVEL: 'debug'
+			});
 
-			const load: Promise<ConfigObject> =  niceConfig.load(options);
+			const load: Promise<ConfigObject> =  niceConfig.load();
 			return load.should.eventually.be.fulfilled.then((config: ConfigObject) => {
 				assert.deepEqual(config.testUrl, 'http://www.default.com');
 				assert.deepEqual(config.featureFlags.feature1, false);
@@ -63,14 +72,14 @@ describe('NiceConfig', function() {
 		});
 
 		it('should read application config without profiles', async function() {
-			const options: NiceConfigOptions = {
-				bootstrapPath: './test/fixtures/load/cloudDisabled',
-				configPath: './test/fixtures/readAppConfig/multiAppYaml',
-				activeProfiles: [],
+			setEnvVars({
+				CONFIG_BOOTSTRAP_PATH: './test/fixtures/load/cloudDisabled',
+				CONFIG_PATH: './test/fixtures/readAppConfig/multiAppYaml',
+				ACTIVE_PROFILES: '',
 				logLevel: 'debug'
-			};
+			});
 
-			const load: Promise<ConfigObject> =  niceConfig.load(options);
+			const load: Promise<ConfigObject> =  niceConfig.load();
 			return load.should.eventually.be.fulfilled.then((config: ConfigObject) => {
 				assert.deepEqual(config.testUrl, 'http://www.default.com');
 				assert.deepEqual(config.featureFlags.feature1, false);
@@ -79,14 +88,14 @@ describe('NiceConfig', function() {
 		});
 
 		it('should read multi application config with profiles', async function() {
-			const options: NiceConfigOptions = {
-				bootstrapPath: './test/fixtures/load/cloudDisabled',
-				configPath: './test/fixtures/readAppConfig/multiAppYaml',
-				activeProfiles: ['dev2'],
+			setEnvVars({
+				CONFIG_BOOTSTRAP_PATH: './test/fixtures/load/cloudDisabled',
+				CONFIG_PATH: './test/fixtures/readAppConfig/multiAppYaml',
+				ACTIVE_PROFILES: 'dev2',
 				logLevel: 'debug'
-			};
+			});
 
-			const load: Promise<ConfigObject> =  niceConfig.load(options);
+			const load: Promise<ConfigObject> =  niceConfig.load();
 			return load.should.eventually.be.fulfilled.then((config: ConfigObject) => {
 				assert.deepEqual(config.testUrl, 'http://www.dev2.com');
 				assert.deepEqual(config.featureFlags.feature1, true);
@@ -96,29 +105,29 @@ describe('NiceConfig', function() {
 
 		it('should throw error if cloud config service throws an error', function() {
 			getConfigFromServerStub.rejects(new Error('some error'));
-			
-			const options: NiceConfigOptions = {
-				bootstrapPath: './test/fixtures/load/commonConfig',
-				configPath: './test/fixtures/readAppConfig/multiAppYaml',
-				activeProfiles: [],
-				logLevel: 'debug'
-			};
 
-			const load: ConfigObject = niceConfig.load(options);
+			setEnvVars({
+				CONFIG_BOOTSTRAP_PATH: './test/fixtures/load/commonConfig',
+				CONFIG_PATH: './test/fixtures/readAppConfig/multiAppYaml',
+				ACTIVE_PROFILES: '',
+				logLevel: 'debug'
+			});
+
+			const load: ConfigObject = niceConfig.load();
 			return load.should.eventually.be.rejectedWith('some error');
 		});
 
 		it('should succeed if cloud config service succeeds', async function() {
 			getConfigFromServerStub.resolves(defaultProfileConfig);
 
-			const options: NiceConfigOptions = {
-				bootstrapPath: './test/fixtures/load/commonConfig',
-				configPath: './test/fixtures/readAppConfig/multiAppYaml',
-				activeProfiles: [],
+			setEnvVars({
+				CONFIG_BOOTSTRAP_PATH: './test/fixtures/load/commonConfig',
+				CONFIG_PATH: './test/fixtures/readAppConfig/multiAppYaml',
+				ACTIVE_PROFILES: '',
 				logLevel: 'debug'
-			};
+			});
 
-			const load: Promise<ConfigObject> =  niceConfig.load(options);
+			const load: Promise<ConfigObject> =  niceConfig.load();
 			return load.should.eventually.be.fulfilled.then((config: ConfigObject) => {
 				assert.deepEqual(config.testUrl, 'http://www.default-local.com');
 				assert.deepEqual(config.featureFlags.feature1, true);
@@ -126,69 +135,94 @@ describe('NiceConfig', function() {
 			});
 		});
 
+		it('should reload config on second call', async function() {
+			const updatedConfig = {
+				...defaultProfileConfig,
+				anotherProp: true
+			};
+			getConfigFromServerStub
+				.onFirstCall().resolves(defaultProfileConfig)
+				.onSecondCall().resolves(updatedConfig);
+
+			setEnvVars({
+				CONFIG_BOOTSTRAP_PATH: './test/fixtures/load/commonConfig',
+				CONFIG_PATH: './test/fixtures/readAppConfig/multiAppYaml',
+				ACTIVE_PROFILES: '',
+				logLevel: 'debug'
+			});
+
+			const load: Promise<ConfigObject> =  niceConfig.load().then(() => niceConfig.load());
+			return load.should.eventually.be.fulfilled.then((config: ConfigObject) => {
+				assert.deepEqual(config.testUrl, 'http://www.default-local.com');
+				assert.deepEqual(config.featureFlags.feature1, true);
+				assert.deepEqual(config.featureFlags.feature2, false);
+				assert.deepEqual(config.anotherProp, true);
+			});
+		});
+
 		it('should fail without app config path', async function() {
 			// @ts-ignore
-			const options: NiceConfigOptions = {
-				activeProfiles: []
-			};
+			setEnvVars({
+				ACTIVE_PROFILES: ''
+			});
 
-			const load: Promise<ConfigObject> =  niceConfig.load(options);
+			const load: Promise<ConfigObject> =  niceConfig.load();
 			return load.should.eventually.be.rejected;
 		});
 
 		it('should fail without activeProfiles', async function() {
 			// @ts-ignore
-			const options: NiceConfigOptions = {
-				configPath: './test/fixtures/load/config',
-			};
+			setEnvVars({
+				CONFIG_PATH: './test/fixtures/load/config',
+			});
 
-			const load: Promise<ConfigObject> =  niceConfig.load(options);
+			const load: Promise<ConfigObject> =  niceConfig.load();
 			return load.should.eventually.be.rejected;
 		});
 
 		it('should fail with invalid bootstrap path', async function() {
-			const options: NiceConfigOptions = {
-				bootstrapPath: './badPath/commonConfig',
-				configPath: './test/fixtures/load/config',
-				activeProfiles: []
-			};
+			setEnvVars({
+				CONFIG_BOOTSTRAP_PATH: './badPath/commonConfig',
+				CONFIG_PATH: './test/fixtures/load/config',
+				ACTIVE_PROFILES: ''
+			});
 
-			const load: Promise<ConfigObject> =  niceConfig.load(options);
+			const load: Promise<ConfigObject> =  niceConfig.load();
 			return load.should.eventually.be.rejected;
 		});
 
 		it('should fail with invalid app config path', async function() {
-			const options: NiceConfigOptions = {
-				bootstrapPath: './test/fixtures/load/commonConfig',
-				configPath: './badPath/fixtures/load/config',
-				activeProfiles: [],
+			setEnvVars({
+				CONFIG_BOOTSTRAP_PATH: './test/fixtures/load/commonConfig',
+				CONFIG_PATH: './badPath/fixtures/load/config',
+				ACTIVE_PROFILES: '',
 				logLevel: 'debug'
-			};
+			});
 
-			const load: Promise<ConfigObject> =  niceConfig.load(options);
+			const load: Promise<ConfigObject> =  niceConfig.load();
 			return load.should.eventually.be.rejected;
 		});
 
 		it('should fail with bad bootstrap config', async function() {
-			const options: NiceConfigOptions = {
-				bootstrapPath: './test/fixtures/load/badBootstrap',
-				configPath: './test/fixtures/load/config',
-				activeProfiles: []
-			};
+			setEnvVars({
+				CONFIG_BOOTSTRAP_PATH: './test/fixtures/load/badBootstrap',
+				CONFIG_PATH: './test/fixtures/load/config',
+				ACTIVE_PROFILES: ''
+			});
 
-			const load: Promise<ConfigObject> =  niceConfig.load(options);
+			const load: Promise<ConfigObject> =  niceConfig.load();
 			return load.should.eventually.be.rejected;
 		});
 
 		it('should succeed with no bootstrap path and same config folder', async function() {
 			getConfigFromServerStub.returns({});
-			const options: NiceConfigOptions = {
-				configPath: './test/fixtures/load/configSameFolder',
-				activeProfiles: [],
+			setEnvVars({
+				CONFIG_PATH: './test/fixtures/load/configSameFolder',
+				ACTIVE_PROFILES: '',
 				logLevel: 'debug'
-			};
+			});
 
-			const load: Promise<ConfigObject> =  niceConfig.load(options);
+			const load: Promise<ConfigObject> =  niceConfig.load();
 			return load.should.eventually.be.fulfilled.then((config: ConfigObject) => {
 				assert.deepEqual(config.spring.cloud.config.name, 'the-application-name');
 				assert.deepEqual(config.spring.cloud.config.endpoint, 'http://localhost:8888');
@@ -199,14 +233,14 @@ describe('NiceConfig', function() {
 
 		it('should load default configs with no profile', async function() {
 			getConfigFromServerStub.returns({});
-			const options: NiceConfigOptions = {
-				bootstrapPath: './test/fixtures/load/commonConfig',
-				configPath: './test/fixtures/load/config',
-				activeProfiles: [],
+			setEnvVars({
+				CONFIG_BOOTSTRAP_PATH: './test/fixtures/load/commonConfig',
+				CONFIG_PATH: './test/fixtures/load/config',
+				ACTIVE_PROFILES: '',
 				logLevel: 'debug'
-			};
+			});
 
-			const load: Promise<ConfigObject> =  niceConfig.load(options);
+			const load: Promise<ConfigObject> =  niceConfig.load();
 			return load.should.eventually.be.fulfilled.then((config: ConfigObject) => {
 				assert.deepEqual(config.spring.cloud.config.name, 'the-application-name');
 				assert.deepEqual(config.spring.cloud.config.endpoint, 'http://localhost:8888');
@@ -217,14 +251,14 @@ describe('NiceConfig', function() {
 
 		it('should load default configs with app name override', async function() {
 			getConfigFromServerStub.returns({});
-			const options: NiceConfigOptions = {
-				bootstrapPath: './test/fixtures/load/commonConfig',
-				configPath: './test/fixtures/load/appNameConfig',
-				activeProfiles: [],
+			setEnvVars({
+				CONFIG_BOOTSTRAP_PATH: './test/fixtures/load/commonConfig',
+				CONFIG_PATH: './test/fixtures/load/appNameConfig',
+				ACTIVE_PROFILES: '',
 				logLevel: 'debug'
-			};
+			});
 
-			const load: Promise<ConfigObject> =  niceConfig.load(options);
+			const load: Promise<ConfigObject> =  niceConfig.load();
 			return load.should.eventually.be.fulfilled.then((config: ConfigObject) => {
 				assert.deepEqual(config.spring.cloud.config.name, 'custom-app-name');
 				assert.deepEqual(config.spring.cloud.config.endpoint, 'http://localhost:8888');
@@ -234,14 +268,14 @@ describe('NiceConfig', function() {
 
 		it('should load dev configs with dev profile', async function() {
 			getConfigFromServerStub.returns({});
-			const options: NiceConfigOptions = {
-				bootstrapPath: './test/fixtures/load/commonConfig',
-				configPath: './test/fixtures/load/config',
-				activeProfiles: ['dev2'],
+			setEnvVars({
+				CONFIG_BOOTSTRAP_PATH: './test/fixtures/load/commonConfig',
+				CONFIG_PATH: './test/fixtures/load/config',
+				ACTIVE_PROFILES: 'dev2',
 				logLevel: 'debug'
-			};
+			});
 
-			const load: Promise<ConfigObject> =  niceConfig.load(options);
+			const load: Promise<ConfigObject> =  niceConfig.load();
 			return load.should.eventually.be.fulfilled.then((config: ConfigObject) => {
 				assert.deepEqual(config.spring.cloud.config.name, 'the-application-name');
 				assert.deepEqual(config.spring.cloud.config.endpoint, 'http://dev-config-server:8888');
@@ -252,14 +286,14 @@ describe('NiceConfig', function() {
 
 		it('should load cloud configs with default profile', async function() {
 			getConfigFromServerStub.returns(defaultProfileConfig);
-			const options: NiceConfigOptions = {
-				bootstrapPath: './test/fixtures/load/commonConfig',
-				configPath: './test/fixtures/load/config',
-				activeProfiles: ['default'],
+			setEnvVars({
+				CONFIG_BOOTSTRAP_PATH: './test/fixtures/load/commonConfig',
+				CONFIG_PATH: './test/fixtures/load/config',
+				ACTIVE_PROFILES: 'default',
 				logLevel: 'debug'
-			};
+			});
 
-			const load: Promise<ConfigObject> =  niceConfig.load(options);
+			const load: Promise<ConfigObject> =  niceConfig.load();
 			return load.should.eventually.be.fulfilled.then((config: ConfigObject) => {
 				assert.deepEqual(config.spring.cloud.config.name, 'the-application-name');
 				assert.deepEqual(config.spring.cloud.config.endpoint, 'http://localhost:8888');
@@ -272,14 +306,14 @@ describe('NiceConfig', function() {
 
 		it('should load cloud configs with dev profile', async function() {
 			getConfigFromServerStub.returns(devProfileConfig);
-			const options: NiceConfigOptions = {
-				bootstrapPath: './test/fixtures/load/commonConfig',
-				configPath: './test/fixtures/load/config',
-				activeProfiles: ['dev1'],
+			setEnvVars({
+				CONFIG_BOOTSTRAP_PATH: './test/fixtures/load/commonConfig',
+				CONFIG_PATH: './test/fixtures/load/config',
+				ACTIVE_PROFILES: 'dev1',
 				logLevel: 'debug'
-			};
+			});
 
-			const load: Promise<ConfigObject> =  niceConfig.load(options);
+			const load: Promise<ConfigObject> =  niceConfig.load();
 			return load.should.eventually.be.fulfilled.then((config: ConfigObject) => {
 				assert.deepEqual(config.spring.cloud.config.name, 'the-application-name');
 				assert.deepEqual(config.spring.cloud.config.endpoint, 'http://dev-config-server:8888');
@@ -300,23 +334,32 @@ describe('NiceConfig', function() {
 
 		afterEach(async function() {
 			sandbox.restore();
+			process.env = nodeEnv;
 		});
 
-		it('should throw error if not loaded yet', async function() {
-			return chai.expect(() =>  niceConfig.instance()).to.throw('NiceConfig hasn\'t been loaded yet. Call \'load\' function first.');
+		it('should not throw error if not loaded yet', function(done: Function) {
+			setEnvVars({
+				CONFIG_BOOTSTRAP_PATH: './test/fixtures/load/cloudDisabled',
+				CONFIG_PATH: './test/fixtures/readAppConfig/singleAppYaml',
+				ACTIVE_PROFILES: 'dev1',
+				LOG_LEVEL: 'debug'
+			});
+
+			assert.deepEqual(niceConfig.instance(), {});
+			done();
 		});
 
 		it('should return instance with defaults', async function() {
-			const options: NiceConfigOptions = {
-				bootstrapPath: './test/fixtures/load/commonConfig',
-				configPath: './test/fixtures/load/config',
-				activeProfiles: [],
+			setEnvVars({
+				CONFIG_BOOTSTRAP_PATH: './test/fixtures/load/commonConfig',
+				CONFIG_PATH: './test/fixtures/load/config',
+				ACTIVE_PROFILES: '',
 				logLevel: 'debug'
-			};
+			});
 
-			const load: Promise<ConfigObject> =  niceConfig.load(options);
-			return chai.expect(load).to.eventually.be.fulfilled.then(() => {
-				const theConfig: ConfigObject =  niceConfig.instance();
+			const load: Promise<ConfigObject> =  niceConfig.load();
+			return chai.expect(load).to.eventually.be.fulfilled.then(async () => {
+				const theConfig: ConfigObject =  await niceConfig.instance();
 				assert.deepEqual(theConfig.spring.cloud.config.name, 'the-application-name');
 				assert.deepEqual(theConfig.spring.cloud.config.endpoint, 'http://localhost:8888');
 				assert.deepEqual(theConfig.testUrl, 'http://www.default.com');

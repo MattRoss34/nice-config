@@ -9,8 +9,8 @@ export * from './NiceConfig';
 export const Config: NiceConfig = Container.get<NiceConfig>(NiceConfig);
 
 // For supporting 'require' syntax, exporting the below as top level functions
-export const load = async (cloudConfigOptions: NiceConfigOptions): Promise<ConfigObject> => {
-    return await Config.load(cloudConfigOptions);
+export const load = async (): Promise<ConfigObject> => {
+    return await Config.load();
 };
 
 export const instance = (): ConfigObject => {
