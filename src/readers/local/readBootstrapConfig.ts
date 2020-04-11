@@ -1,7 +1,8 @@
-import { ConfigObject, NiceConfigOptions, Document } from "../../models";
-import { mergeProperties, readYamlAsDocument, getApplicationJsonFromEnv, getAndParsePropsFromEnv, logger } from "../../utils";
-import { BootstrapConfigSchema } from "../../schemas";
+import * as fs from 'fs';
 import { PREDEFINED_ENV_PROPERTIES } from "../../constants";
+import { ConfigObject, Document, NiceConfigOptions } from "../../models";
+import { BootstrapConfigSchema } from "../../schemas";
+import { getAndParsePropsFromEnv, getApplicationJsonFromEnv, logger, mergeProperties, readYamlAsDocument } from "../../utils";
 
 const DEFAULT_BOOTSTRAP_YAML = { spring: { cloud: { config: { enabled: false }}}};
 
@@ -16,10 +17,17 @@ export const readBootstrapConfig = async (options: NiceConfigOptions): Promise<C
 
     // Load bootstrap.yml based on the profile name (like devEast or stagingEast)
     const theBootstrapPath: string = bootstrapPath !== undefined ? bootstrapPath : configPath;
+    const bootstrapFile: string = `${theBootstrapPath}/bootstrap.yml`;
+
     let bootstrapYaml: Document = {};
-    try {
-        bootstrapYaml = await readYamlAsDocument(`${theBootstrapPath}/bootstrap.yml`, activeProfiles);
-    } catch (error) {
+    if (fs.existsSync(bootstrapFile)) {
+        try {
+            bootstrapYaml = await readYamlAsDocument(bootstrapFile, activeProfiles);
+        } catch (error) {
+            logger.error(`Error reading bootstrap config at ${theBootstrapPath}: ${error.message}`);
+            throw error;
+        }
+    } else {
         logger.warn(`No bootstrap.yml found in ${theBootstrapPath}`);
     }
 

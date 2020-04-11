@@ -30,6 +30,17 @@ describe('readBootstrapConfig', function() {
 			return load.should.eventually.be.fulfilled;
 		});
 
+		it('should fail with invalid bootstrap yaml syntax', async function() {
+			const options: NiceConfigOptions = {
+				bootstrapPath: './test/fixtures/load/invalidBootstrapYml',
+				configPath: './test/fixtures/load/config',
+				activeProfiles: []
+			};
+
+			const load: Promise<ConfigObject> =  readBootstrapConfig(options);
+			return load.should.eventually.be.rejected;
+		});
+
 		it('should fail with bad bootstrap config', async function() {
 			const options: NiceConfigOptions = {
 				bootstrapPath: './test/fixtures/load/badBootstrap',
