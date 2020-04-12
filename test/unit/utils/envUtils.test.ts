@@ -1,6 +1,6 @@
 import { assert } from 'chai';
-import { getApplicationJsonFromEnv, getAndParsePropsFromEnv } from '../../../src/utils';
-import { PREDEFINED_ENV_PROPERTIES } from '../../../src/constants';
+import { SPRING_CLOUD_ENV_PROPS } from '../../../src/readers/remote/springCloudConfigReader/constants';
+import { getAndParsePropsFromEnv, getApplicationJsonFromEnv } from '../../../src/utils';
 
 describe('envUtils', function() {
 
@@ -36,14 +36,14 @@ describe('envUtils', function() {
 		});
 
 		it('should return empty if all are undefined', function (done: Function) {
-            assert.deepEqual(getAndParsePropsFromEnv(PREDEFINED_ENV_PROPERTIES), {});
+            assert.deepEqual(getAndParsePropsFromEnv(SPRING_CLOUD_ENV_PROPS), {});
             done();
         });
 
 		it('should return data when defined', function (done: Function) {
             process.env.SPRING_CONFIG_ENDPOINT = 'https://sometesturl:8888';
             assert.deepEqual(
-                getAndParsePropsFromEnv(PREDEFINED_ENV_PROPERTIES),
+                getAndParsePropsFromEnv(SPRING_CLOUD_ENV_PROPS),
                 { spring: { cloud: { config: { endpoint: 'https://sometesturl:8888' }}}}
             );
             done();

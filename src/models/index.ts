@@ -1,3 +1,3 @@
-export * from './NiceConfig';
-export * from './Retry';
-export * from './ConfigReader';
+export * from './niceConfig';
+export * from './retry';
+export * from './configReader';

@@ -1,13 +1,13 @@
 import { ConfigObject } from '../models';
-import { logger } from './logger';
 import { parsePropertiesToObjects } from './documentUtils';
+import { logger } from './logger';
 
 export type EnvVariableMapping = {
     envVariableName: string;
     propertyName: string;
 };
 
-export const getPropertiesFromEnv = (envVariableMappings: Array<EnvVariableMapping>): Record<string, string> => {
+export const getPropertiesFromEnv = <TProps extends Record<string, string | undefined>>(envVariableMappings: Array<EnvVariableMapping>): TProps => {
     let envProps: Record<string, string> = {};
     envVariableMappings.forEach(({ envVariableName, propertyName }) => {
         if (process.env[envVariableName] !== undefined) {
@@ -15,10 +15,11 @@ export const getPropertiesFromEnv = (envVariableMappings: Array<EnvVariableMappi
         }
     });
 
-    return envProps;
+    return envProps as TProps;
 };
 
-export const getAndParsePropsFromEnv = (envVariableMappings: Array<EnvVariableMapping>): ConfigObject =>
+// tslint:disable-next-line: no-any
+export const getAndParsePropsFromEnv = <T extends Record<string, any>>(envVariableMappings: Array<EnvVariableMapping>): ConfigObject =>
     parsePropertiesToObjects(getPropertiesFromEnv(envVariableMappings));
 
 /**

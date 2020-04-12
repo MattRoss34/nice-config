@@ -1,6 +1,11 @@
-import { ConfigObject } from "src/models";
+import { ConfigObject } from '.';
 
-// export interface RemoteConfigReader {
-//     read(bootstrapConfig: ConfigObject): Promise<ConfigObject>;
-// }
-export type RemoteConfigReader = (bootstrapConfig: ConfigObject) => Promise<ConfigObject>;
+export type ConfigReaderOptions = {
+    defaultConfigPath?: string;
+    activeProfiles: string[];
+    applicationConfig: ConfigObject;
+};
+
+export interface RemoteConfigReader {
+    invoke: (bootstrapConfig: ConfigReaderOptions) => Promise<ConfigObject>;
+}

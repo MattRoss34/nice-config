@@ -1,10 +1,10 @@
 
 import { injectable } from 'inversify';
-import { ConfigObject, NiceConfigOptions } from './models';
-import { readApplicationConfig, readBootstrapConfig } from './readers/local';
-import * as remoteConfigReaders from './readers/remote';
-import { logger, mergeProperties, getPropertiesFromEnv } from './utils';
 import { NICE_CONFIG_ENV_OPTIONS } from './constants';
+import { ConfigObject, NiceConfigOptions } from './models';
+import { readApplicationConfig } from './readers/local';
+import * as remoteConfigReaders from './readers/remote';
+import { getApplicationJsonFromEnv, getPropertiesFromEnv, logger, mergeProperties } from './utils';
 
 @injectable()
 export class NiceConfig {
@@ -15,17 +15,15 @@ export class NiceConfig {
 	private getOptions(): NiceConfigOptions {
 		if (!this.options) {
 			const {
-				bootstrapPath,
-				configPath,
-				activeProfiles,
-				logLevel
+				configPath = './config',
+				activeProfiles = '',
+				logLevel = 'warn'
 			} = getPropertiesFromEnv(NICE_CONFIG_ENV_OPTIONS);
 
 			this.options = {
-				bootstrapPath,
-				configPath: configPath || './config',
-				activeProfiles: activeProfiles ? activeProfiles.split(',') : [],
-				logLevel: logLevel || 'warn'
+				configPath,
+				activeProfiles: activeProfiles.split(','),
+				logLevel
 			};
 		}
 
@@ -42,27 +40,24 @@ export class NiceConfig {
 	private async readConfig(options: NiceConfigOptions): Promise<ConfigObject> {
 		let configProperties: ConfigObject[] = [];
 
-		this.bootstrapConfig = await readBootstrapConfig(options);
-		logger.debug(`Using Bootstrap Config: ${JSON.stringify(this.bootstrapConfig)}`);
-
-		const applicationConfig: ConfigObject =
+		const applicationConfigFromFile: ConfigObject =
 			await readApplicationConfig(options.configPath, options.activeProfiles);
+
+		const applicationConfig = mergeProperties([
+			applicationConfigFromFile,
+			getApplicationJsonFromEnv()
+		]);
 		logger.debug(`Using Application Config: ${JSON.stringify(applicationConfig)}`);
 		configProperties.push(applicationConfig);
-
-		// Override appliction name in bootstrap config if defined in application config
-		if (applicationConfig.spring
-				&& applicationConfig.spring.cloud
-				&& applicationConfig.spring.cloud.config
-				&& applicationConfig.spring.cloud.config.name) {
-					this.bootstrapConfig.spring.cloud.config.name = applicationConfig.spring.cloud.config.name;
-				}
 
 		const readers = Object.values(remoteConfigReaders);
 
 		for (let i = 0; i < readers.length; i++) {
-			const remoteConfig = await readers[i](this.bootstrapConfig);
-			configProperties.push(remoteConfig);
+			configProperties.push(await readers[i].invoke({
+				activeProfiles: options.activeProfiles,
+				defaultConfigPath: options.configPath,
+				applicationConfig
+			}));
 		}
 
 		// Bootstrap properties have the highest priority, so pushing this last

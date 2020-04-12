@@ -1,0 +1,17 @@
+#Default config properties
+spring:
+   cloud:
+      config:
+         enabled: true
+         fail-fast: true
+         name: the-application-name
+         endpoint: http://localhost:8888
+         label: master
+         retry:
+            enabled: true
+            initial-interval: 100
+            max-interval: 150
+            max-attempts: 3
+---
+profiles: dev1,dev2
+spring.cloud.config.endpoint: http://dev-config-server:8888

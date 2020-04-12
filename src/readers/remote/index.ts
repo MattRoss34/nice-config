@@ -1,1 +1,1 @@
-export * from './springCloudConfigReader';
+export { default as springCloudConfigReader } from './springCloudConfigReader';

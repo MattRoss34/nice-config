@@ -1,8 +1,8 @@
-import { Document } from "../models";
-import { logger } from ".";
-import * as yaml from 'js-yaml';
-import * as fs from 'fs';
 import * as extend from 'extend';
+import * as fs from 'fs';
+import * as yaml from 'js-yaml';
+import { logger } from '.';
+import { ConfigObject, Document } from '../models';
 
 /**
  * Determines if the given yaml document should be used with regard to the
@@ -115,8 +115,9 @@ export const readYamlAsDocument = (relativePath: string, activeProfiles: string[
  * @param {object[]} objects Array of Objects containing properties to be merged
  * @returns {object} Object containing the merged properties
  */
-export const mergeProperties = (objects: object[]): object => {
-    var mergedConfig: object = {};
+// tslint:disable-next-line: no-any
+export const mergeProperties = <T extends ConfigObject = any>(objects: object[]): T => {
+    var mergedConfig: T = {} as T;
     for (var i = 0; i < objects.length; i++) {
         extend(true, mergedConfig, objects[i]);
     }
