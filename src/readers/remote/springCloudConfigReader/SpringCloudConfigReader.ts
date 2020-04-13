@@ -1,5 +1,6 @@
 import * as CloudConfigClient from 'cloud-config-client';
-import { ConfigObject, ConfigReaderOptions, RemoteConfigReader, RetryOptions, RetryState } from '../../../models';
+import { existsSync } from 'fs';
+import { ConfigObject, ConfigReaderOptions, Document, RemoteConfigReader, RetryOptions, RetryState } from '../../../models';
 import { getAndParsePropsFromEnv, logger, mergeProperties, parsePropertiesToObjects, readYamlAsDocument, retryFunctionWithState } from '../../../utils';
 import { DEFAULT_CONFIG_CLIENT_OPTIONS, SPRING_CLOUD_ENV_PROPS } from './constants';
 import { ConfigClientOptions, SpringCloudConfigOptions, SpringCloudEnvProps } from './models';
@@ -15,41 +16,50 @@ export default class SpringCloudConfigReader implements RemoteConfigReader {
      */
     private getSpringBootstrapConfig = async ({
         activeProfiles,
-        applicationNameOverride
+        applicationNameOverride,
+        defaultConfigPath
     }: {
         activeProfiles: string[];
         applicationNameOverride?: string;
-    }): Promise<SpringCloudConfigOptions> => {
-        const { springBootstrapConfigFile, ...bootstrapEnvProps } = getAndParsePropsFromEnv<SpringCloudEnvProps>(SPRING_CLOUD_ENV_PROPS);
+        defaultConfigPath: string;
+    }): Promise<SpringCloudConfigOptions | undefined> => {
+        const { springBootstrapEnvFile, ...bootstrapEnvProps } = getAndParsePropsFromEnv<SpringCloudEnvProps>(SPRING_CLOUD_ENV_PROPS);
+        const springBootstrapConfigFile = springBootstrapEnvFile || `${defaultConfigPath}/bootstrap.yml`;
 
-        // Load bootstrap.yml based on the profile name (like devEast or stagingEast)
-        let springBootstrapConfig: ConfigObject = {};
-        if (springBootstrapConfigFile) {
+        const bootstrapExists = existsSync(springBootstrapConfigFile);
+        if (!bootstrapExists && springBootstrapEnvFile) {
+            throw new Error(`Bootstrap file not found at ${springBootstrapConfigFile}`);
+        }
+
+        let thisBootstrapConfig: SpringCloudConfigOptions | undefined = undefined;
+        if (bootstrapExists) {
+            // Load bootstrap.yml based on the profile name (like devEast or stagingEast)
+            let springBootstrapConfigDoc: Document = {};
             try {
-                springBootstrapConfig = await readYamlAsDocument(springBootstrapConfigFile, activeProfiles);
+                springBootstrapConfigDoc = await readYamlAsDocument(springBootstrapConfigFile, activeProfiles);
             } catch (error) {
                 logger.error(`Error reading spring cloud bootstrap file ${springBootstrapConfigFile}: ${error.message}`);
                 throw error;
             }
-        }
 
-        // Always override active profiles
-        // Override appliction name in bootstrap config if defined in application config
-        const configClientOverrides: Partial<ConfigClientOptions> = {
-            profiles: activeProfiles,
-            ...(applicationNameOverride !== undefined ? { name: applicationNameOverride } : {})
-        };
+            // Always override active profiles
+            // Override appliction name in bootstrap config if defined in application config
+            const configClientOverrides: Partial<ConfigClientOptions> = {
+                profiles: activeProfiles,
+                ...(applicationNameOverride !== undefined ? { name: applicationNameOverride } : {})
+            };
 
-        const thisBootstrapConfig: SpringCloudConfigOptions = mergeProperties([
-            { spring: { cloud: { config: DEFAULT_CONFIG_CLIENT_OPTIONS }}},
-            springBootstrapConfig,
-            bootstrapEnvProps,
-            { spring: { cloud: { config: configClientOverrides }}}
-        ]);
+            thisBootstrapConfig = mergeProperties<SpringCloudConfigOptions>([
+                { spring: { cloud: { config: DEFAULT_CONFIG_CLIENT_OPTIONS }}},
+                springBootstrapConfigDoc,
+                bootstrapEnvProps,
+                { spring: { cloud: { config: configClientOverrides }}}
+            ]);
 
-        const { error } = BootstrapConfigSchema.validate(thisBootstrapConfig, { allowUnknown: true });
-        if (error) {
-            throw new Error(error.details[0].message);
+            const { error } = BootstrapConfigSchema.validate(thisBootstrapConfig, { allowUnknown: true });
+            if (error) {
+                throw new Error(error.details[0].message);
+            }
         }
 
         return thisBootstrapConfig;
@@ -75,16 +85,17 @@ export default class SpringCloudConfigReader implements RemoteConfigReader {
 		return cloudConfig;
 	}
 
-    public invoke = async ({ activeProfiles, applicationConfig }: ConfigReaderOptions): Promise<ConfigObject> => {
+    public invoke = async ({ activeProfiles, applicationConfig, defaultConfigPath }: ConfigReaderOptions): Promise<ConfigObject> => {
         const applicationNameOverride = applicationConfig.spring?.cloud?.config?.name;
-        const springCloudConfigOptions: SpringCloudConfigOptions = await this.getSpringBootstrapConfig({
+        const springCloudConfigOptions = await this.getSpringBootstrapConfig({
             activeProfiles,
-            applicationNameOverride
+            applicationNameOverride,
+            defaultConfigPath
         });
-        const configClientOptions = springCloudConfigOptions.spring.cloud.config;
 
         let cloudConfig: ConfigObject = {};
-        if (configClientOptions.enabled) {
+        if (springCloudConfigOptions && springCloudConfigOptions.spring.cloud.config.enabled) {
+            const configClientOptions = springCloudConfigOptions.spring.cloud.config;
             logger.debug(`Spring Cloud Options: ${JSON.stringify(configClientOptions)}`);
 
             const retryOptions: RetryOptions | undefined = configClientOptions.retry;

@@ -26,5 +26,5 @@ export type SpringCloudConfigOptions = {
 };
 
 export type SpringCloudEnvProps = Partial<SpringCloudConfigOptions> & {
-    springConfigBootstrapFile: string;
+    springBootstrapEnvFile: string;
 };

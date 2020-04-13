@@ -14,7 +14,7 @@ export const DEFAULT_CONFIG_CLIENT_OPTIONS: Partial<ConfigClientOptions> = {
 };
 
 export const SPRING_CLOUD_ENV_PROPS: Array<EnvVariableMapping> = [
-    { envVariableName: 'SPRING_CONFIG_BOOTSTRAP_FILE', propertyName: 'springBootstrapConfigFile' },
+    { envVariableName: 'SPRING_CONFIG_BOOTSTRAP_FILE', propertyName: 'springBootstrapEnvFile' },
     { envVariableName: 'SPRING_CONFIG_ENDPOINT', propertyName: 'spring.cloud.config.endpoint' },
     { envVariableName: 'SPRING_CONFIG_AUTH_USER', propertyName: 'spring.cloud.config.auth.user' },
     { envVariableName: 'SPRING_CONFIG_AUTH_PASS', propertyName: 'spring.cloud.config.auth.pass' },

@@ -1,7 +1,7 @@
 import { ConfigObject } from '.';
 
 export type ConfigReaderOptions = {
-    defaultConfigPath?: string;
+    defaultConfigPath: string;
     activeProfiles: string[];
     applicationConfig: ConfigObject;
 };

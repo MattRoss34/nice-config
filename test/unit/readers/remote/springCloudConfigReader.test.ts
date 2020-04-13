@@ -10,7 +10,6 @@ import { ConfigObject, ConfigReaderOptions } from '../../../../src';
 import SpringCloudConfigReader from '../../../../src/readers/remote/springCloudConfigReader/SpringCloudConfigReader';
 import { setEnvVars } from '../../../utils';
 
-
 chai.use(chaiAsPromised);
 chai.should();
 
@@ -51,6 +50,7 @@ describe('SpringCloudConfigReader', function() {
 			configReaderOptions = {
 				activeProfiles: [],
 				applicationConfig: {},
+				defaultConfigPath: './test/fixtures/springCloudConfig',
 			};
 			springCloudConfigReader = new SpringCloudConfigReader();
 		});
@@ -61,6 +61,43 @@ describe('SpringCloudConfigReader', function() {
 		});
 
 		it('should skip cloud config when bootstrap not specified', async function() {
+			setEnvVars({
+				SPRING_CONFIG_BOOTSTRAP_FILE: '',
+			});
+
+			const getConfigFromServer: Promise<ConfigObject> = springCloudConfigReader.invoke(configReaderOptions);
+
+			return getConfigFromServer.should.eventually.be.fulfilled.then((config: ConfigObject) => {
+				assert.deepEqual(config, {});
+			});
+		});
+
+		it('should use default app path when bootstrap not specified', async function() {
+			setEnvVars({
+				SPRING_CONFIG_BOOTSTRAP_FILE: '',
+			});
+			configClientLoadStub.resolves(undefined);
+			configReaderOptions.defaultConfigPath = './test/fixtures/springCloudConfig/defaultPath'
+
+			const getConfigFromServer: Promise<ConfigObject> = springCloudConfigReader.invoke(configReaderOptions);
+
+			return getConfigFromServer.should.eventually.be.fulfilled.then((config: ConfigObject) => {
+				console.log(`$$$ ${JSON.stringify(config)}`);
+				assert.deepEqual(config.spring.cloud.config.name, 'the-default-path-app');
+			});
+		});
+
+		it('should throw error when bootstrap specified but missing', async function() {
+			setEnvVars({
+				SPRING_CONFIG_BOOTSTRAP_FILE: './test/fixtures/springCloudConfig/bootstrap.doesntexist.yml',
+			});
+
+			const getConfigFromServer: Promise<ConfigObject> = springCloudConfigReader.invoke(configReaderOptions);
+
+			return getConfigFromServer.should.eventually.be.rejected;
+		});
+
+		it('should skip cloud config when not used', async function() {
 			setEnvVars({
 				SPRING_CONFIG_BOOTSTRAP_FILE: '',
 			});
