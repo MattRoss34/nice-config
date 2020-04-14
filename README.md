@@ -166,13 +166,12 @@ config/application-prod.yml
 
 This module supports some pre-defined properties/property sources from the Node env. This enables you to exclude sensitive data from your repository files and instead provide them using environment variables.  For example, you might want to exclude the username and password used for authenticating with your remote config server from your git repo.
 
-When set, node env variables will be mapped to their respective config properties during the bootstrap phase. Be aware, env variables take highest precedence so they'll override whatever value is provided from other sources.
+Be aware, env variables take highest precedence so they'll override whatever value is provided from other sources.
 
 #### Environment Variables
 
 | Env Variable Name | Type | Usage |
 | --- | --- | --- |
-| CONFIG_BOOTSTRAP_PATH | string | The folder path to your bootstrap config file. Default: `/config` |
 | CONFIG_PATH | string | The folder path to your application config file(s). Default: `/config` |
 | ACTIVE_PROFILES | string | Comma-separated string of profile names to use. Default: none |
 | LOG_LEVEL | debug, info, warn, error | The logging level to be used by nice-config. Default: warn |

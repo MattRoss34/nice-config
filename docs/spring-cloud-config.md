@@ -28,6 +28,7 @@ If you'd like nice-config to retry connecting to your cloud config server after 
 
 | Env Variable Name | Type | Usage |
 | --- | --- | --- |
+| SPRING_CONFIG_BOOTSTRAP_FILE | string | Overrides the default bootstrap file location.<p>Example: `SPRING_CONFIG_BOOTSTRAP_FILE=./spring/config/bootstrap.yml node index.js` |
 | SPRING_CONFIG_ENDPOINT | string | Maps to `spring.cloud.config.endpoint`.<p>Example: `SPRING_CONFIG_ENDPOINT=http://test:8888 node index.js` |
 | SPRING_CONFIG_AUTH_USER | string | Maps to `spring.cloud.config.auth.user`.<p>Example: `SPRING_CONFIG_AUTH_USER=user1 node index.js` |
 | SPRING_CONFIG_AUTH_PASS | string | Maps to `spring.cloud.config.auth.pass`.<p>Example: `SPRING_CONFIG_AUTH_PASS=user1password node index.js` |
