@@ -11,7 +11,8 @@
         "emitDecoratorMetadata": true,
         "allowSyntheticDefaultImports": true,
         "strictNullChecks": true,
-        "baseUrl": "."
+        "baseUrl": ".",
+        "forceConsistentCasingInFileNames": true,
     },
     "include": ["src/**/*"],
     "exclude": ["dist", "node_modules", "test"]
