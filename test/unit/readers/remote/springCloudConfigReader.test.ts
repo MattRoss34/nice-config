@@ -3,7 +3,7 @@ import 'reflect-metadata';
 import * as chai from 'chai';
 import { assert } from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
-import * as CloudConfigClient from 'cloud-config-client';
+import * as CloudConfigClient from 'nice-cloud-config-client';
 import * as sinon from 'sinon';
 import { SinonStub } from 'sinon';
 import { ConfigObject, ConfigReaderOptions } from '../../../../src';

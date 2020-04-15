@@ -1,4 +1,4 @@
-import * as CloudConfigClient from 'cloud-config-client';
+import * as CloudConfigClient from 'nice-cloud-config-client';
 import { existsSync } from 'fs';
 import { ConfigObject, ConfigReaderOptions, Document, RemoteConfigReader, RetryOptions, RetryState } from '../../../models';
 import { getAndParsePropsFromEnv, logger, mergeProperties, parsePropertiesToObjects, readYamlAsDocument, retryFunctionWithState } from '../../../utils';

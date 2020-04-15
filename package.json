@@ -1,12 +1,12 @@
 {
   "name": "nice-config",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "NodeJS application configuration using yaml files and, optionally, remote property sources like spring cloud config server.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "dependencies": {
     "@hapi/joi": "^15.1.0",
-    "cloud-config-client": "^1.0.0",
+    "nice-cloud-config-client": "^1.0.0",
     "extend": "^3.0.2",
     "inversify": "^5.0.1",
     "js-yaml": "^3.12.0",
