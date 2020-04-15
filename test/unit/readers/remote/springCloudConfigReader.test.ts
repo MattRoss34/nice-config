@@ -141,6 +141,26 @@ describe('SpringCloudConfigReader', function() {
 			});
 		});
 
+		it('should return previous cloud config when client throws error (without fail-fast)', async function() {
+			configClientLoadStub
+				.onFirstCall().resolves({
+					forEach(callback: Function, aBoolValue: boolean) {
+						callback('testUrl', 'http://www.default-local.com');
+						callback('featureFlags.feature1', true);
+						callback('featureFlags.feature2', false);
+					}
+				})
+				.onSecondCall().throws(new Error('some error'));
+
+			const getConfigFromServer: Promise<ConfigObject> = springCloudConfigReader.invoke(configReaderOptions);
+
+			return getConfigFromServer.should.eventually.be.fulfilled.then((config: ConfigObject) => {
+				assert.deepEqual(config.testUrl, 'http://www.default-local.com');
+				assert.deepEqual(config.featureFlags.feature1, true);
+				assert.deepEqual(config.featureFlags.feature2, false);
+			});
+		});
+
 		it('should throw error when client throws error and fail-fast is true, retry disabled', async function() {
 			configClientLoadStub.throws(new Error('some error'));
 			setEnvVars({

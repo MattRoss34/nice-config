@@ -8,6 +8,8 @@ import { BootstrapConfigSchema } from './schemas';
 
 export default class SpringCloudConfigReader implements RemoteConfigReader {
 
+    private cloudConfig: ConfigObject = {};
+
     /**
      * Reads the application's bootstrap configuration file into an object.
      *
@@ -73,7 +75,7 @@ export default class SpringCloudConfigReader implements RemoteConfigReader {
 	 */
 	private getConfigFromServer = async (configClientOptions: ConfigClientOptions): Promise<ConfigObject> => {
 		let cloudConfig: ConfigObject = {};
-		const cloudConfigProperties: ConfigObject | undefined = await CloudConfigClient.load(configClientOptions, null);
+		const cloudConfigProperties: ConfigObject | undefined = await CloudConfigClient.load(configClientOptions, undefined);
 		if (cloudConfigProperties) {
 			// tslint:disable-next-line: no-any
 			cloudConfigProperties.forEach(function(key: string, value: any) {
@@ -93,7 +95,6 @@ export default class SpringCloudConfigReader implements RemoteConfigReader {
             defaultConfigPath
         });
 
-        let cloudConfig: ConfigObject = {};
         if (springCloudConfigOptions && springCloudConfigOptions.spring.cloud.config.enabled) {
             const configClientOptions = springCloudConfigOptions.spring.cloud.config;
             logger.debug(`Spring Cloud Options: ${JSON.stringify(configClientOptions)}`);
@@ -101,19 +102,14 @@ export default class SpringCloudConfigReader implements RemoteConfigReader {
             const retryOptions: RetryOptions | undefined = configClientOptions.retry;
             const retryState: RetryState = new RetryState(retryOptions);
 
+            let cloudConfigResponse: ConfigObject | undefined;
             try {
-                const cloudConfigResponse = await this.getConfigFromServer(configClientOptions);
-                cloudConfig = mergeProperties([
-                    cloudConfigResponse,
-                    springCloudConfigOptions
-                ]);
-
-                logger.debug(`Cloud Config: ${JSON.stringify(cloudConfig)}`);
+                cloudConfigResponse = await this.getConfigFromServer(configClientOptions);
             } catch (error) {
                 logger.warn("Error reading cloud config: ", error);
                 if (configClientOptions['fail-fast'] === true) {
                     if (retryOptions && retryOptions.enabled === true) {
-                        cloudConfig = await retryFunctionWithState<ConfigObject>(
+                        cloudConfigResponse = await retryFunctionWithState<ConfigObject>(
                             () => this.getConfigFromServer(configClientOptions),
                             retryState
                         );
@@ -122,8 +118,16 @@ export default class SpringCloudConfigReader implements RemoteConfigReader {
                     }
                 }
             }
-        }
 
-        return cloudConfig;
+            if (cloudConfigResponse) {
+                this.cloudConfig = mergeProperties([
+                    cloudConfigResponse,
+                    springCloudConfigOptions
+                ]);
+            }
+        }
+        logger.debug(`Cloud Config: ${JSON.stringify(this.cloudConfig)}`);
+
+        return this.cloudConfig;
     }
 }
