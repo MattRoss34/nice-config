@@ -1,6 +1,6 @@
 {
   "name": "nice-config",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "NodeJS application configuration using yaml files and, optionally, remote property sources like spring cloud config server.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
